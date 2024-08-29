@@ -20,8 +20,8 @@ import java.io.IOException;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private JwtService jwtService;
-    private UserDetailsServiceImp userDetailsServiceImp;
+    private final JwtService jwtService;
+    private final UserDetailsServiceImp userDetailsServiceImp;
 
     @Autowired
     public JwtAuthenticationFilter(
@@ -31,13 +31,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.userDetailsServiceImp = userDetailsServiceImp;
     }
 
-    /**
-     * @param request
-     * @param response
-     * @param filterChain
-     * @throws ServletException
-     * @throws IOException
-     */
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
@@ -46,57 +39,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String autHeader = request.getHeader("Authorization");
 
-        // "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." : exemple de token d'authentification
-        if(autHeader == null || !autHeader.startsWith("Bearer")) {
+        if (autHeader == null || !autHeader.startsWith("Bearer")) {
             filterChain.doFilter(request, response);
             return;
         }
+
         String token = autHeader.substring(7);
         String username = jwtService.extractUsername(token);
 
-        /* vérifier si le username n'est pas null et s'il ne s'est pas encore authentifier
-         * SecurityContextHolder : permet de vérifier si le user s'est authentifier ou pas
-         */
-        if(username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsServiceImp.loadUserByUsername(username); // load the username
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = this.userDetailsServiceImp.loadUserByUsername(username);
 
-            //vérifier si le token est valide ou pas
-            if(jwtService.isTokenValid(token, userDetails)){
-
-                /*
-                 * Créer un objet d'authentication pour le user euthentifié
-                 * userDetails: représente les détails du user authentifié
-                 * null: représente le credential qui n'est pas nécessaire à ce niveau
-                 * userDetails.getAuthorities() : obtenir les autorisations du user
-                 */
+            if (jwtService.isTokenValid(token, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities()
                 );
-
-                /*
-                 * définit les détails du jeton d'authentication avec les
-                 *  détails de la demande web actuelle
-                 */
 
                 authToken.setDetails(
                         new WebAuthenticationDetailsSource().buildDetails(request)
                 );
 
-                /*
-                 * Définit l'objet d'authentification (authToken) dans
-                 * SecurityContextHolder, marquant ainsi l'utilisateur
-                 * comme authentifié pour la requête en cours
-                 */
                 SecurityContextHolder.getContext().setAuthentication(authToken);
-
             }
         }
 
-        /*
-         * Procède à la chaîne de filtrage, permettant à la demande de
-         * poursuivre le traitement.
-         */
         filterChain.doFilter(request, response);
     }
-
 }

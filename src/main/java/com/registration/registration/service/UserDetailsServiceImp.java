@@ -23,12 +23,12 @@ public class UserDetailsServiceImp implements UserDetailsService {
 
     /**
      * This method allow us to load user from database by this username
-     * @param username
+     * @param email
      * @return
      * @throws UsernameNotFoundException
      */
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return repository.findUserByUsername(username).orElseThrow(() -> new UsernameNotFoundException("user not found"));
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        return repository.findUserByEmail(email).orElseThrow(() -> new UsernameNotFoundException("user not found"));
     }
 }
