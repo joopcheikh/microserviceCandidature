@@ -11,8 +11,8 @@ import io.swagger.v3.oas.annotations.servers.Server;
 @OpenAPIDefinition(
         info = @Info(
                 contact = @Contact(
-                        name = "Gats",
-                        email = "Gats@gmail.com",
+                        name = "Gats: Global Africa Technology System - Adresse: 17, cité horizon VDN",
+                        email = "Email: gats@gatsmapping.com  -  Tel: +221 33 856 84 46  +221 660 34 34",
                         url = "https://gatsmapping.com"
                 ),
                 description = "Gats est une entreprise sénégalaise spécialisée dans les technologies",
@@ -23,12 +23,9 @@ import io.swagger.v3.oas.annotations.servers.Server;
         servers = {
                 @Server(
                         description = "server local",
-                        url = "http://localhost:8080"
+                        url = "http://localhost:8089"
                 ),
-                @Server(
-                        description = "server local de Gats",
-                        url = "https://-----------------"
-                )
+
         }
 
 )
