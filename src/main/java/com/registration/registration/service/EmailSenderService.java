@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import com.registration.registration.repository.EmailSenderRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class EmailSenderService {
 
@@ -19,12 +21,11 @@ public class EmailSenderService {
     private JavaMailSender mailSender;
 
     @Autowired
-    private EmailSenderRepository emailSenderRepository; // Injection du repository
+    private EmailSenderRepository emailSenderRepository;
 
     private ConcurrentHashMap<String, CodeEntry> validationCodes = new ConcurrentHashMap<>();
-    private final long expirationTime = TimeUnit.MINUTES.toMillis(15); // 15 minutes
+    private final long expirationTime = TimeUnit.MINUTES.toMillis(15);
 
-    // Classe interne pour gérer les codes et leur timestamp
     private static class CodeEntry {
         String code;
         long timestamp;
@@ -38,15 +39,16 @@ public class EmailSenderService {
     private ConcurrentHashMap<String, String> tokens = new ConcurrentHashMap<>();
 
     public String generateToken(String email) {
-        String token = UUID.randomUUID().toString(); // Générer un token unique
-        tokens.put(email, token); // Associer le token à l'email
+        String token = UUID.randomUUID().toString();
+        tokens.put(email, token);
         return token;
     }
+
     public void removeToken(String email) {
         tokens.remove(email);
         validationCodes.remove(email);
     }
-    
+
     public boolean validateToken(String email, String token) {
         String storedToken = tokens.get(email);
         return storedToken != null && storedToken.equals(token);
@@ -63,35 +65,36 @@ public class EmailSenderService {
         message.setTo(to);
         message.setSubject(subject);
         message.setText(body);
-        mailSender.send(message);
+        try {
+            mailSender.send(message);
+            System.out.println("Email envoyé à : " + to);
+        } catch (Exception e) {
+            System.err.println("Erreur lors de l'envoi de l'email : " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     public void storeValidationCode(String email, String code) {
-        // Stocker le code avec un timestamp
         long timestamp = System.currentTimeMillis();
         validationCodes.put(email, new CodeEntry(code, timestamp));
     }
 
     public boolean validateCode(String email, String code) {
         CodeEntry entry = validationCodes.get(email);
-
-        // Vérifier si le code existe
-        if (entry == null) {
-            return false; // Code non trouvé
-        }
-
-        // Vérifier l'expiration
+        if (entry == null) return false;
         if (System.currentTimeMillis() - entry.timestamp > expirationTime) {
-            validationCodes.remove(email); // Supprimer le code expiré
-            return false; // Code expiré
+            validationCodes.remove(email);
+            return false;
         }
-
-        // Vérifier si le code correspond
         return entry.code.equals(code);
     }
 
     public boolean emailExists(String email) {
-        return emailSenderRepository.existsByEmail(email); // Utiliser le repository pour vérifier l'existence de l'email
+        return emailSenderRepository.existsByEmail(email);
     }
-    
+
+    @Transactional
+    public void updatePassword(String email, String newPassword) {
+        emailSenderRepository.updatePassword(email, newPassword);
+    }
 }

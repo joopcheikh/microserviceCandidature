@@ -57,7 +57,10 @@ public class SecurityConfig {
                                         "/configuration/ui",
                                         "/configuration/security",
                                         "/swagger-ui.html",
-                                        "/webjars/**"
+                                        "/webjars/**",
+                                        "/email/send",
+                                        "/email/validate",
+                                        "/email/change-password"
                                         )
                                 .permitAll()
                                 .anyRequest()

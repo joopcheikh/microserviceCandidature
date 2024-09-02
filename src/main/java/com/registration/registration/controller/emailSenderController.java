@@ -1,6 +1,5 @@
 package com.registration.registration.controller;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,40 +9,56 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.registration.registration.repository.EmailSenderRepository;
 import com.registration.registration.service.EmailSenderService;
-
 
 @RestController
 @RequestMapping("/email")
-public class emailSenderController {
+public class EmailSenderController {
 
     @Autowired
     private EmailSenderService emailService;
 
     @Autowired
-    private EmailSenderRepository userRepository;
-
-    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/send")
-    public ResponseEntity<Object> sendEmail(@RequestBody EmailRequest emailRequest) {
-        if (emailService.emailExists(emailRequest.getTo())) {
-            String validationCode = emailService.generateValidationCode();
-            emailService.storeValidationCode(emailRequest.getTo(), validationCode);
-    
-            String bodyWithCode = emailRequest.getBody() + "\nVotre code de validation est: " + validationCode;
-            emailService.sendEmail(emailRequest.getTo(), emailRequest.getSubject(), bodyWithCode);
-    
-            // Return JSON response
-            return ResponseEntity.ok().body(new ApiResponse("success", "Email envoye avec success!"));
+    public ResponseEntity<ApiResponse> sendEmail(@RequestBody EmailRequest emailRequest) {
+        String email = emailRequest.getTo();
+        if (emailService.emailExists(email)) {
+            return ResponseEntity.badRequest().body(new ApiResponse("error", "L'email existe déjà !"));
         }
-        // Return JSON response for existing email
-        return ResponseEntity.badRequest().body(new ApiResponse("error", "l'email exist deja!"));
+
+        String validationCode = emailService.generateValidationCode();
+        emailService.storeValidationCode(email, validationCode);
+
+        String bodyWithCode = emailRequest.getBody() + "\nVotre code de validation est : " + validationCode;
+        emailService.sendEmail(email, emailRequest.getSubject(), bodyWithCode);
+
+        return ResponseEntity.ok(new ApiResponse("success", "Email envoyé avec succès !"));
     }
 
-    // Create a simple class for API responses
+    @PostMapping("/validate")
+    public ResponseEntity<TokenResponse> validateCode(@RequestBody ValidationRequest validationRequest) {
+        boolean isValid = emailService.validateCode(validationRequest.getEmail(), validationRequest.getCode());
+        if (isValid) {
+            String token = emailService.generateToken(validationRequest.getEmail());
+            return ResponseEntity.ok(new TokenResponse(token));
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<ApiResponse> changePassword(@RequestBody ChangePasswordRequest request) {
+        boolean isValidToken = emailService.validateToken(request.getEmail(), request.getToken());
+        if (isValidToken) {
+            String encryptedPassword = passwordEncoder.encode(request.getPassword());
+            emailService.updatePassword(request.getEmail(), encryptedPassword); // Assurez-vous que cette méthode est correcte dans le service
+            emailService.removeToken(request.getEmail());
+            return ResponseEntity.ok(new ApiResponse("success", "Mot de passe changé avec succès !"));
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("error", "Token invalide !"));
+    }
+
     public static class ApiResponse {
         private String status;
         private String message;
@@ -70,7 +85,7 @@ public class emailSenderController {
         }
     }
 
-    public class TokenResponse {
+    public static class TokenResponse {
         private String token;
 
         public TokenResponse(String token) {
@@ -86,41 +101,11 @@ public class emailSenderController {
         }
     }
 
-    @PostMapping("/validate")
-    public ResponseEntity<TokenResponse> validateCode(@RequestBody ValidationRequest validationRequest) {
-        boolean isValid = emailService.validateCode(validationRequest.getEmail(), validationRequest.getCode());
-        
-        if (isValid) {
-            String token = emailService.generateToken(validationRequest.getEmail());
-            TokenResponse response = new TokenResponse(token);
-            return ResponseEntity.ok(response);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
-    }
-
-    @PostMapping("/change-password")
-    public ResponseEntity<ApiResponse> changePassword(@RequestBody ChangePasswordRequest request) {
-        boolean isValidToken = emailService.validateToken(request.getEmail(), request.getToken());
-        if (isValidToken) {
-            String encryptedPassword = passwordEncoder.encode(request.getPassword());
-            userRepository.updatePassword(request.getEmail(), encryptedPassword);
-            emailService.removeToken(request.getEmail());
-    
-            ApiResponse response = new ApiResponse("success", "success");
-            return ResponseEntity.ok(response);
-        } else {
-            ApiResponse response = new ApiResponse("error", "error");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-        }
-    }
-
     public static class ChangePasswordRequest {
         private String email;
         private String token;
         private String password;
 
-        // Getters et Setters
         public String getEmail() {
             return email;
         }
@@ -196,5 +181,4 @@ public class emailSenderController {
             this.code = code;
         }
     }
-    
 }
