@@ -1,6 +1,5 @@
 package com.registration.registration.config;
 
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +19,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.registration.registration.filter.JwtAuthenticationFilter;
 import com.registration.registration.service.UserDetailsServiceImp;
+
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 
 

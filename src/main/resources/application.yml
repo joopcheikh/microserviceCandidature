@@ -16,6 +16,15 @@ spring:
             hibernate:
                 format_sql: true
         database: postgresql
+    
+    mail:
+        host: smtp.gmail.com
+        port: 587
+        username: joopcheikh48@gmail.com
+        password: joopcheikh48600
+        properties:
+            mail.smtp.auth: true
+            mail.smtp.starttls.enable: true
         
 server:
     port: 8089

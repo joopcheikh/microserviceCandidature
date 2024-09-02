@@ -5,10 +5,12 @@ import java.util.Collection;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,10 +30,14 @@ public class User implements UserDetails {
     private String firstname;
 
     private String lastname;
-
+    
+    @Column(unique = true)
     private String email;
 
     private String password;
+
+    @OneToOne
+    private Candidature candidature;
 
     //@Enumerated(value = EnumType.STRING)
     //private Role role;
