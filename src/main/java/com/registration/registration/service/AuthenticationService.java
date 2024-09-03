@@ -12,6 +12,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.registration.registration.emailrest.EmailService;
 import com.registration.registration.model.Candidature;
 import com.registration.registration.model.User;
 import com.registration.registration.repository.CandidatureRepository;
@@ -29,17 +30,22 @@ public class AuthenticationService {
     private final CandidatureRepository candidatureRepository;
 
     @Autowired
+    private EmailService emailService;
+
+    @Autowired
     public AuthenticationService(
             JwtService jwtService,
             PasswordEncoder passwordEncoder,
             UserRepository userRepository,
             CandidatureRepository candidatureRepository,
             AuthenticationManager authenticationManager) {
+
         this.jwtService = jwtService;
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.authenticationManager = authenticationManager;
         this.candidatureRepository = candidatureRepository;
+
     }
 
     public AuthenticationResponse register(User userRigistry) {
@@ -48,15 +54,18 @@ public class AuthenticationService {
         user.setLastname(userRigistry.getLastname());
         user.setEmail(userRigistry.getEmail());
         user.setPassword(passwordEncoder.encode(userRigistry.getPassword()));
-        //user.setRole(userRigistry.getRole());
 
+        String emailBody = "Bonjour votre compte a ete cree avec succes";
+        emailService.sendEmail(user.getEmail(), "Alerte creation de compte gatsmapping", emailBody);
+
+        // Return JSON response
         User savedUser = userRepository.save(user);
         String token = jwtService.generateToken(savedUser);
 
         return new AuthenticationResponse(token);
     }
 
-    public AuthenticationResponse login(User authUser){
+    public AuthenticationResponse login(User authUser) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         authUser.getEmail(),
@@ -78,14 +87,14 @@ public class AuthenticationService {
         if (!Files.exists(file)) {
             throw new IllegalArgumentException("Le fichier doit être un PDF.");
         }
-
+        System.out.println("i m here");
         // Vérifiez si l'utilisateur existe déjà
         //Optional<Candidature> existingCandidat = candidatureRepository.findCandidatureByUsername(username);
         Optional<Candidature> existingCandidat = candidatureRepository.findCandidatureByUsername(username);
         if (existingCandidat.isPresent()) {
             throw new IllegalArgumentException("Un utilisateur avec ce nom d'utilisateur existe déjà.");
         }
-
+        System.out.println("next to the problem");
         // Enregistrez les informations de l'utilisateur
         Candidature candidat = new Candidature();
         candidat.setUsername(username);
@@ -99,7 +108,7 @@ public class AuthenticationService {
         candidat.setFilePath(filePath); // Stocker le chemin du fichier
         // user.setRole("ROLE_CANDIDATE"); // Décommentez si nécessaire
         // user.setPassword(""); // Définissez un mot de passe si nécessaire
-
+        System.out.println("nexproblem");
         try {
             candidatureRepository.save(candidat);
         } catch (Exception e) {

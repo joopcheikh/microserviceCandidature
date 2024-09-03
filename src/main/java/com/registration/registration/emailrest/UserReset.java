@@ -1,4 +1,4 @@
-package com.registration.registration.model;
+package com.registration.registration.emailrest;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -7,8 +7,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "emailreset")
-public class EmailSender {
+@Table(name = "users") 
+public class UserReset {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,5 +49,4 @@ public class EmailSender {
     public void setPassword(String password) { 
         this.password = password; 
     }
-    
 }

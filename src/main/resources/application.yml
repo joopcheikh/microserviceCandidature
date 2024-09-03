@@ -15,18 +15,24 @@ spring:
       hibernate:
         format_sql: true
     database: postgresql
+    
+    
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  
 
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: joopcheikh48@gmail.com
-    password: joopcheikh48668600
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
+        host: smtp.gmail.com
+        port: 587
+        username: mpsolver01@gmail.com
+        password: zisb ljyv ywnr rxov
+        properties:
+            mail.smtp.auth: true
+            mail.smtp.starttls.enable: true
+
+
 
 server:
   port: 8089

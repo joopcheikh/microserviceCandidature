@@ -36,6 +36,7 @@ public class CandidatureController {
             @RequestParam("file") MultipartFile file
     ) {
         try {
+            System.out.println("next to the problem");
             // Vérifiez que le fichier n'est pas null
             if (file == null || file.isEmpty()) {
                 return ResponseEntity.badRequest().body("Aucun fichier sélectionné.");
