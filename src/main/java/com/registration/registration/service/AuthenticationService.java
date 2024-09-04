@@ -55,8 +55,15 @@ public class AuthenticationService {
         user.setEmail(userRigistry.getEmail());
         user.setPassword(passwordEncoder.encode(userRigistry.getPassword()));
 
-        String emailBody = "Bonjour votre compte a ete cree avec succes";
+        String emailBody = String.format(
+        "Bonjour %s,\n\n" +
+        "Votre compte sur Armée SN a été créé avec succès. Vous pouvez maintenant passer votre candidature.\n\n" +
+        "Merci !",
+        user.getFirstname()
+        );
+
         emailService.sendEmail(user.getEmail(), "Alerte creation de compte gatsmapping", emailBody);
+     
 
         // Return JSON response
         User savedUser = userRepository.save(user);
