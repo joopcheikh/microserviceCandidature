@@ -1,11 +1,13 @@
 package com.registration.registration.model;
 
 import java.util.Date;
+import java.util.List;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -47,5 +49,8 @@ public class Candidature {
 
     @OneToOne
     private User user;
+
+    @OneToMany
+    private List<Concours> concours;
 
 }
