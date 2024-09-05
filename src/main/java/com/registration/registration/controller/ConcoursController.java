@@ -22,7 +22,7 @@ public class ConcoursController {
     @Autowired
     public ConcoursServiceImpl concoursServiceImpl;
 
-    @PostMapping("/add")
+    @PostMapping("/addconcour")
     public ResponseEntity<Concours> addConcours(@RequestBody Concours concours) {
         return ResponseEntity.ok(concoursServiceImpl.addConcours(concours));
     }
