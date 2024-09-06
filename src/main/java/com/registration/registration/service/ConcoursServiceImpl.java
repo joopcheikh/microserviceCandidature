@@ -1,5 +1,6 @@
 package com.registration.registration.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +61,10 @@ public class ConcoursServiceImpl implements ConcoursService {
         }
 
         concoursRepository.deleteById(id);
+    }
+
+    public List<Concours> getAllConcours() {
+        return concoursRepository.findAll();
     }
 
 }

@@ -1,5 +1,6 @@
 package com.registration.registration.controller;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ public class ConcoursController {
     @Autowired
     public ConcoursServiceImpl concoursServiceImpl;
 
-    @PostMapping("/addconcour")
+    @PostMapping("/add-concours")
     public ResponseEntity<Concours> addConcours(@RequestBody Concours concours) {
         return ResponseEntity.ok(concoursServiceImpl.addConcours(concours));
     }
@@ -47,6 +48,11 @@ public class ConcoursController {
     public ResponseEntity<Void> deleteConcour(@PathVariable Integer id) {
         concoursServiceImpl.deleteConcour(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/all-concours")
+    public List<Concours> getAllConcours() {
+        return concoursServiceImpl.getAllConcours();
     }
     
 }

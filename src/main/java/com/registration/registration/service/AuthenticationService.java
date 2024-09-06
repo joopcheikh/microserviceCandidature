@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.registration.registration.emailrest.EmailService;
 import com.registration.registration.model.Candidature;
+import com.registration.registration.model.Role;
 import com.registration.registration.model.User;
 import com.registration.registration.repository.CandidatureRepository;
 import com.registration.registration.repository.UserRepository;
@@ -54,6 +55,7 @@ public class AuthenticationService {
         user.setLastname(userRigistry.getLastname());
         user.setEmail(userRigistry.getEmail());
         user.setPassword(passwordEncoder.encode(userRigistry.getPassword()));
+        user.setRole(Role.USER);
 
         String emailBody = String.format(
         "Bonjour %s,\n\n" +
@@ -69,7 +71,7 @@ public class AuthenticationService {
         User savedUser = userRepository.save(user);
         String token = jwtService.generateToken(savedUser);
 
-        return new AuthenticationResponse(token);
+        return new AuthenticationResponse(token, savedUser.getRole().name());
     }
 
     public AuthenticationResponse login(User authUser) {
@@ -84,11 +86,11 @@ public class AuthenticationService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         String token = jwtService.generateToken(user);
 
-        return new AuthenticationResponse(token);
+        return new AuthenticationResponse(token, user.getRole().name());
     }
 
     // Methode pour les candidatures
-    public String candidature(String username, String firstname, String telephone, String sexe, String address, Date birthdate, String birthplace, String cnicardnumber, String filePath) throws IOException {
+    public String candidature(String username, String firstname, String telephone, String sexe, String address, Date birthdate, String birthplace, String cnicardnumber, String filePath, String concours) throws IOException {
         // Vérifiez que le fichier est un PDF
         Path file = Paths.get(filePath);
         if (!Files.exists(file)) {
@@ -113,6 +115,7 @@ public class AuthenticationService {
         candidat.setBirthplace(birthplace);
         candidat.setCnicardnumber(cnicardnumber);
         candidat.setFilePath(filePath); // Stocker le chemin du fichier
+        candidat.setConcours(concours);
         // user.setRole("ROLE_CANDIDATE"); // Décommentez si nécessaire
         // user.setPassword(""); // Définissez un mot de passe si nécessaire
         System.out.println("nexproblem");

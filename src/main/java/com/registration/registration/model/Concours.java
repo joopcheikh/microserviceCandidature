@@ -1,10 +1,11 @@
 package com.registration.registration.model;
 
+import java.sql.Date;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,10 +23,8 @@ public class Concours {
     private Integer id;
 
     private String nom;
+    private Date date;
 
     private String description;
-
-    @ManyToOne()
-    private Candidature candidature;
     
 }

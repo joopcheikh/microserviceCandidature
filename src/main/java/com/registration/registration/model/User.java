@@ -7,10 +7,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -36,11 +37,12 @@ public class User implements UserDetails {
 
     private String password;
 
-    @OneToOne
-    private Candidature candidature;
+    //@OneToOne(cascade = CascadeType.ALL)
+    //@JoinColumn(name = "candidature_id", referencedColumnName = "id", nullable = false)
+    //private Candidature candidature;
 
-    //@Enumerated(value = EnumType.STRING)
-    //private Role role;
+    @Enumerated(value = EnumType.STRING)
+    private Role role = Role.USER;
 
     /**
      * @return the list of the user's roles
