@@ -1,19 +1,19 @@
 package com.registration.registration.service;
 
+import java.util.Date;
+import java.util.function.Function;
+
+import javax.crypto.SecretKey;
+
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+
 import com.registration.registration.model.User;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
-
-import javax.crypto.SecretKey;
-import java.security.Key;
-import java.util.Base64;
-import java.util.Date;
-import java.util.Stack;
-import java.util.function.Function;
 
 @Service
 public class JwtService {
@@ -30,6 +30,7 @@ public class JwtService {
                 .subject(user.getUsername())
                 .claim("firstname", user.getFirstname())
                 .claim("lastname", user.getLastname())
+                .claim("role", user.getRole())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 24*60*60*1000))
                 .signWith(getSiningKey())

@@ -16,7 +16,7 @@ public class CandidatureServiceController {
     @Autowired
     private CandidatureServiceImpl candidatureServiceImpl;
 
-    @GetMapping("/findcandidature")
+    @GetMapping("/get-candidatures")
     public ResponseEntity<List<Candidature>> listerCandidature() {
         return ResponseEntity.ok(candidatureServiceImpl.listerCandidature());
     }
