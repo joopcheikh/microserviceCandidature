@@ -5,7 +5,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/registration
     username: postgres
-    password: qqqq
+    password: aaaa
 
   jpa:
     hibernate:
@@ -33,7 +33,7 @@ spring:
             mail.smtp.starttls.enable: true
 
 server:
-  port: 8089
+  port: 8091
 
 logging:
   level:
