@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -29,8 +30,8 @@ public class CandidatureController {
             @RequestParam("firstname") String firstname,
             @RequestParam("telephone") String telephone,
             @RequestParam("sexe") String sexe,
-            @RequestParam("address") String address, // Correction du mot "adress" en "address"
-            @RequestParam("birthdate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date birthdate, // Assurez-vous d'importer @DateTimeFormat
+            @RequestParam("address") String address,
+            @RequestParam("birthdate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date birthdate,
             @RequestParam("birthplace") String birthplace,
             @RequestParam("cnicardnumber") String cnicardnumber,
             @RequestParam("file") MultipartFile file,
@@ -38,35 +39,38 @@ public class CandidatureController {
     ) {
         try {
             System.out.println("next to the problem");
-            // Vérifiez que le fichier n'est pas null
             if (file == null || file.isEmpty()) {
                 return ResponseEntity.badRequest().body("Aucun fichier sélectionné.");
             }
     
-            // Définissez le répertoire où vous voulez stocker les fichiers
             Path directory = Paths.get("candidatures/");
             if (!Files.exists(directory)) {
                 Files.createDirectories(directory);
             }
     
-            // Assurez-vous que le nom du fichier est sûr et valide
-            String filename = file.getOriginalFilename();
-            if (filename == null || filename.contains("..")) {
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null || originalFilename.contains("..")) {
                 return ResponseEntity.badRequest().body("Nom de fichier invalide.");
             }
+            
+            String fileExtension = "";
+            int dotIndex = originalFilename.lastIndexOf('.');
+            if (dotIndex > 0) {
+                fileExtension = originalFilename.substring(dotIndex); 
+            }
+            
+            String uniqueFilename = UUID.randomUUID().toString() + fileExtension;
     
-            Path path = directory.resolve(filename);
+            Path path = directory.resolve(uniqueFilename);
     
-            // Enregistrez le fichier sur le serveur
             try (FileOutputStream fos = new FileOutputStream(path.toFile())) {
                 fos.write(file.getBytes());
             } catch (IOException e) {
                 return ResponseEntity.status(500).body("Erreur lors de l'enregistrement du fichier.");
             }
     
-            // Passez le chemin du fichier au service
             String filePath = path.toString();
-            String response = authenticationService.candidature(username, firstname,telephone, sexe, address, birthdate, birthplace, cnicardnumber, filePath, concours);
+            String response = authenticationService.candidature(username, firstname, telephone, sexe, address, birthdate, birthplace, cnicardnumber, filePath, concours);
             return ResponseEntity.ok(response);
         } catch (IOException e) {
             return ResponseEntity.status(500).body("Erreur lors du traitement de la candidature.");
