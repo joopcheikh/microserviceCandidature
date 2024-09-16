@@ -1,24 +1,27 @@
 package com.candidature.candidature.model;
-
 import java.util.Date;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+import jakarta.persistence.*;
+
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
-
-@Data
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
-@Table(name = "candidature")
+@Table(
+    name = "candidature",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"user_id", "concours"})
+    }
+)
 public class Candidature {
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,8 +45,13 @@ public class Candidature {
 
     private String filePath;
 
-    private String password;
+    private Status status = Status.WAITING;
 
+    @Column(nullable = false)
     private String concours;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
+    private User user;
 }

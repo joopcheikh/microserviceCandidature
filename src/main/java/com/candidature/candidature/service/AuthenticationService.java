@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.candidature.candidature.model.Candidature;
+import com.candidature.candidature.model.User;
 import com.candidature.candidature.repository.CandidatureRepository;
 import com.candidature.candidature.repository.UserRepository;
 
@@ -41,7 +42,7 @@ public class AuthenticationService {
 
 
     // Methode pour les candidatures
-    public String candidature(String username, String firstname, String telephone, String sexe, String address, Date birthdate, String birthplace, String cnicardnumber, String filePath, String concours) throws IOException {
+    public String candidature(String username, String firstname, String telephone, String sexe, String address, Date birthdate, String birthplace, String cnicardnumber, String filePath, String concours,User user) throws IOException {
         // Vérifiez que le fichier est un PDF
         Path file = Paths.get(filePath);
         if (!Files.exists(file)) {
@@ -59,6 +60,7 @@ public class AuthenticationService {
         candidat.setCnicardnumber(cnicardnumber);
         candidat.setFilePath(filePath); // Stocker le chemin du fichier
         candidat.setConcours(concours);
+        candidat.setUser(user);
         // user.setRole("ROLE_CANDIDATE"); // Décommentez si nécessaire
         // user.setPassword(""); // Définissez un mot de passe si nécessaire
         System.out.println("nexproblem");
