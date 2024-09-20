@@ -47,9 +47,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         req -> req
-                        .requestMatchers("/get-candidatures","/files/**").hasAnyAuthority("ADMIN","RECRUITER")
-                        .requestMatchers("/candidature").hasAuthority("USER")
-                        .requestMatchers("/accept-candidature","/reject-candidature").hasAuthority("RECRUITER")
+                        .requestMatchers("/get-candidatures", "/files/**").hasAnyAuthority("ADMIN", "RECRUITER", "USER")
+                        .requestMatchers("/candidature/delete/{id}").hasAnyAuthority("ADMIN","USER")
+                        .requestMatchers("/accept-candidature", "/reject-candidature").hasAuthority("RECRUITER")
                                 .anyRequest()
                                 .authenticated()
                 )
@@ -58,7 +58,7 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
-
+    
     @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();

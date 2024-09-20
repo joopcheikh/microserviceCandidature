@@ -36,6 +36,9 @@ public class User implements UserDetails {
 
     private String firstname;
 
+
+    private Boolean have_postuled = false;
+    private String type_candidat;
     private String lastname;
 
     @Column(unique = true)

@@ -1,6 +1,8 @@
 package com.candidature.candidature.service;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
@@ -23,6 +25,11 @@ public class CandidatureServiceImpl {
     public List<Candidature> listerCandidature() {
         return candidatureRepository.findAll();
     }
+
+    public List<Candidature> getConcoursByUserId(Integer userId) {
+        return candidatureRepository.findByUserId(userId);
+    }
+    
 
     public void rejeterCandidature(Integer candidatureId) {
         updateCandidatureStatusAndNotify(candidatureId, Status.REJECTED, 
@@ -62,5 +69,14 @@ public class CandidatureServiceImpl {
         message.setSubject(subject);
         message.setText(content);
         mailSender.send(message);
+    }
+
+    public boolean deleteCandidatureById(Integer candidatureId) {
+        if (candidatureRepository.existsById(candidatureId)) {
+            candidatureRepository.deleteById(candidatureId);
+            return true;
+        } else {
+            return false; // Candidature non trouvée
+        }
     }
 }

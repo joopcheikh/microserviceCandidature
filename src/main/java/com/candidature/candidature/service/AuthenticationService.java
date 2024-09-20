@@ -21,10 +21,9 @@ import io.jsonwebtoken.io.IOException;
 @Service
 public class AuthenticationService {
 
-
     private final CandidatureRepository candidatureRepository;
-
-
+    private final UserRepository userRepository;
+    private final JwtService jwtService;
 
     @Autowired
     public AuthenticationService(
@@ -34,21 +33,22 @@ public class AuthenticationService {
             CandidatureRepository candidatureRepository,
             AuthenticationManager authenticationManager) {
 
-
+        this.jwtService = jwtService;
+        this.userRepository = userRepository;
         this.candidatureRepository = candidatureRepository;
 
     }
 
-
-
     // Methode pour les candidatures
-    public String candidature(String username, String firstname, String telephone, String sexe, String address, Date birthdate, String birthplace, String cnicardnumber, String filePath, String concours,User user) throws IOException {
+    public AuthenticationResponse candidature(String username, String firstname, String telephone, String sexe, String address,
+            Date birthdate, String birthplace, String cnicardnumber, String filePath, String concours, User user)
+            throws IOException {
         // Vérifiez que le fichier est un PDF
         Path file = Paths.get(filePath);
         if (!Files.exists(file)) {
             throw new IllegalArgumentException("Le fichier doit être un PDF.");
         }
-       
+
         Candidature candidat = new Candidature();
         candidat.setUsername(username);
         candidat.setFirstname(firstname);
@@ -66,10 +66,14 @@ public class AuthenticationService {
         System.out.println("nexproblem");
         try {
             candidatureRepository.save(candidat);
+            user.setHave_postuled(true);
+            userRepository.save(user);
         } catch (Exception e) {
             throw new RuntimeException("Erreur lors de l'enregistrement de l'utilisateur.", e);
         }
 
-        return "Candidature reçue avec succès.";
+        String token = jwtService.generateToken(user);
+
+        return new AuthenticationResponse(token, user.getRole().name(),"");
     }
 }
