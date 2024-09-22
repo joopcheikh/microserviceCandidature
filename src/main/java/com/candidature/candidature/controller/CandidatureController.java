@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,12 +20,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.candidature.candidature.model.Candidature;
 import com.candidature.candidature.model.User;
 import com.candidature.candidature.repository.UserRepository;
 import com.candidature.candidature.service.AuthenticationResponse;
 import com.candidature.candidature.service.AuthenticationService;
 import com.candidature.candidature.service.CandidatureServiceImpl;
-import com.candidature.candidature.service.UserService;
+
 
 @RestController
 public class CandidatureController {
@@ -119,14 +119,29 @@ public class CandidatureController {
         }
     }
 
-    @DeleteMapping("/candidature/delete/{id}")
-    public ResponseEntity<String> deleteCandidature(@PathVariable("id") Integer candidatureId) {
-        boolean isDeleted = candidatureServiceImp.deleteCandidatureById(candidatureId);
+   @DeleteMapping("/candidature/delete/{id}")
+public ResponseEntity<String> deleteCandidature(@PathVariable("id") Integer candidatureId) {
+    Candidature candidature = candidatureServiceImp.getCandidatureById(candidatureId);
 
-        if (isDeleted) {
-            return ResponseEntity.ok("Candidature supprimée avec succès.");
-        } else {
-            return ResponseEntity.status(404).body("Candidature non trouvée.");
-        }
+    if (candidature == null) {
+        return ResponseEntity.status(404).body("Candidature non trouvée.");
     }
+
+    String filePath = candidature.getFilePath();
+    try {
+        if (filePath != null && !filePath.isEmpty()) {
+            Path path = Paths.get(filePath);
+            Files.deleteIfExists(path);
+        }
+    } catch (IOException e) {
+        return ResponseEntity.status(500).body("Erreur lors de la suppression du fichier.");
+    }
+    boolean isDeleted = candidatureServiceImp.deleteCandidatureById(candidatureId);
+
+    if (isDeleted) {
+        return ResponseEntity.ok("Candidature et fichier supprimés avec succès.");
+    } else {
+        return ResponseEntity.status(500).body("Erreur lors de la suppression de la candidature.");
+    }
+}
 }

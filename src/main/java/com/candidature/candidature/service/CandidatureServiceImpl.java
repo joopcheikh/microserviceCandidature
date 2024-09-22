@@ -1,8 +1,6 @@
 package com.candidature.candidature.service;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
@@ -70,6 +68,12 @@ public class CandidatureServiceImpl {
         message.setText(content);
         mailSender.send(message);
     }
+
+    public Candidature getCandidatureById(Integer candidatureId) {
+        return candidatureRepository.findById(candidatureId)
+                .orElse(null); 
+    }
+    
 
     public boolean deleteCandidatureById(Integer candidatureId) {
         if (candidatureRepository.existsById(candidatureId)) {
