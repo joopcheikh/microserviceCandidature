@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,40 +41,68 @@ public class AuthenticationService {
     }
 
     // Methode pour les candidatures
-    public AuthenticationResponse candidature(String username, String firstname, String telephone, String sexe, String address,
-            Date birthdate, String birthplace, String cnicardnumber, String filePath, String concours, User user)
-            throws IOException {
-        // Vérifiez que le fichier est un PDF
-        Path file = Paths.get(filePath);
-        if (!Files.exists(file)) {
-            throw new IllegalArgumentException("Le fichier doit être un PDF.");
+    public AuthenticationResponse candidature(
+        String lastname,
+        String firstname,
+        String telephone,
+        String sexe,
+        String address,
+        Date birthdate,
+        String birthplace,
+        List<String> filePaths, // Change from String[] to List<String>
+        String concours,
+        User user
+    ) throws IOException {
+        
+        // Vérification que tous les fichiers existent et sont des PDFs
+        for (String filePath : filePaths) {
+            Path file = Paths.get(filePath);
+            if (!Files.exists(file)) {
+                throw new IllegalArgumentException("Le fichier suivant n'existe pas : " + filePath);
+            }
+            if (!filePath.endsWith(".pdf")) {
+                throw new IllegalArgumentException("Le fichier doit être un PDF : " + filePath);
+            }
         }
-
+    
+        // Création de l'objet Candidature
         Candidature candidat = new Candidature();
-        candidat.setUsername(username);
+        candidat.setLastname(lastname);
         candidat.setFirstname(firstname);
         candidat.setTelephone(telephone);
         candidat.setSexe(sexe);
         candidat.setAdress(address);
         candidat.setBirthdate(birthdate);
         candidat.setBirthplace(birthplace);
-        candidat.setCnicardnumber(cnicardnumber);
-        candidat.setFilePath(filePath); // Stocker le chemin du fichier
+        candidat.setFilePath(filePaths); // Stocker le tableau de chemins de fichiers
         candidat.setConcours(concours);
         candidat.setUser(user);
-        // user.setRole("ROLE_CANDIDATE"); // Décommentez si nécessaire
-        // user.setPassword(""); // Définissez un mot de passe si nécessaire
-        System.out.println("nexproblem");
+    
+        // Enregistrement de la candidature et de l'utilisateur
         try {
             candidatureRepository.save(candidat);
             user.setHave_postuled(true);
             userRepository.save(user);
         } catch (Exception e) {
-            throw new RuntimeException("Erreur lors de l'enregistrement de l'utilisateur.", e);
+            throw new RuntimeException("Erreur lors de l'enregistrement de la candidature.", e);
         }
+    
+        // Génération du token
+
+        System.out.println("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
+        System.out.println("User ID: " + user.getId());
+        System.out.println("User Email: " + user.getEmail());
+        System.out.println("User Role: " + (user.getRole() != null ? user.getRole().name() : "Role non défini"));
+
 
         String token = jwtService.generateToken(user);
-
-        return new AuthenticationResponse(token, user.getRole().name(),"");
+        System.out.println("token: "+ token);
+        AuthenticationResponse response = new AuthenticationResponse(token, user.getRole().name(), "");
+        System.out.println("Response Token: " + response.getToken());
+        System.out.println("Response Role: " + response.getRole());
+        System.out.println("Response Error: " + response.getError());
+        
+        return response;
     }
 }
+          

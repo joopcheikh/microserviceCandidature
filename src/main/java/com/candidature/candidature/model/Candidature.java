@@ -1,5 +1,6 @@
 package com.candidature.candidature.model;
 import java.util.Date;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
@@ -27,7 +28,7 @@ public class Candidature {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private String username;
+    private String lastname;
 
     private String firstname;
 
@@ -41,9 +42,16 @@ public class Candidature {
 
     private String birthplace;
 
-    private String cnicardnumber;
+    private List<String> filePath; 
+    
+    // getters et setters
+    public List<String> getFilePath() {
+        return filePath;
+    }
 
-    private String filePath;
+    public void setFilePath(List<String> filePath) {
+        this.filePath = filePath;
+    }
 
     private Status status = Status.WAITING;
 

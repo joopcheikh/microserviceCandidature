@@ -9,8 +9,6 @@ import com.candidature.candidature.model.Candidature;
 
 public interface CandidatureRepository extends JpaRepository<Candidature, Integer> {
 
-    Optional<Candidature> findCandidatureByUsername(String username);
-
     List<Candidature> findByUserId(Integer userId);
 
 }
