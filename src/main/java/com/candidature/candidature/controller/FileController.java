@@ -20,27 +20,28 @@ public class FileController {
     private final String fileBasePath = "candidatures/";
 
     @GetMapping("/download")
-public ResponseEntity<Resource> getFile(@RequestParam String filePath) {
-    try {
-        // Remplacer les barres obliques inverses par des barres obliques
-        filePath = filePath.replace("\\", "/");
-        System.out.println(filePath); //candidatures/Sosthène Mounsamboté_stanislas_6/ENOA/avis de remboursement Patrice Christ (1).pdf
-        Path path = Paths.get(fileBasePath + filePath).toAbsolutePath().normalize();
-        System.out.println("Attempting to load file from path: " + path.toString()); // Debugging
+    public ResponseEntity<Resource> getFile(@RequestParam String filePath) {
+        try {
+            // Remplacer les barres obliques inverses par des barres obliques
+            filePath = filePath.replace("\\", "/");
+            System.out.println(filePath);
+            Path path = Paths.get(fileBasePath + filePath).toAbsolutePath().normalize();
+            System.out.println("Attempting to load file from path: " + path.toString()); // Debugging
 
-        Resource resource = new UrlResource(path.toUri());
-        if (resource.exists() || resource.isReadable()) {
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-                    .body(resource);
-        } else {
-            System.out.println("File not found: " + path.toString()); // Debugging
-            return ResponseEntity.notFound().build();
+            Resource resource = new UrlResource(path.toUri());
+            if (resource.exists() || resource.isReadable()) {
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_DISPOSITION,
+                                "attachment; filename=\"" + resource.getFilename() + "\"")
+                        .body(resource);
+            } else {
+                System.out.println("File not found: " + path.toString()); // Debugging
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace(); // Log l'erreur
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-    } catch (Exception e) {
-        e.printStackTrace(); // Log l'erreur
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
-}
 
 }
