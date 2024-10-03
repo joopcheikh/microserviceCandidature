@@ -14,27 +14,40 @@ import org.springframework.stereotype.Service;
 import com.candidature.candidature.model.User;
 import com.candidature.candidature.repository.UserRepository;
 
+/**
+ * @author cheikh diop
+ *
+ * Service d'implémentation de UserDetailsService. Cette classe est responsable de
+ * charger les détails d'un utilisateur à partir de la base de données lors de l'authentification.
+ * Elle est utilisée par Spring Security pour vérifier les informations d'identification de l'utilisateur.
+ */
 @Service
 public class UserDetailsServiceImp implements UserDetailsService {
+
     /*
      * Lorsque l'utilisateur tente de se connecter, Spring Security utilise
      * le UserDetailsService pour récupérer un objet UserDetails qui contient
      * les informations de l'utilisateur, comme le nom d'utilisateur,
-     * le mot de passe, et les rôles. Cela permet de vérifier si l'utilisateur
+     * le mot de passe et les rôles. Cela permet de vérifier si l'utilisateur
      * existe et si ses informations sont correctes.
      */
     private final UserRepository userRepository;
 
+    /**
+     * Constructeur pour initialiser le UserDetailsService avec le repository d'utilisateurs.
+     *
+     * @param repository Le repository d'utilisateurs à utiliser pour les opérations de base de données.
+     */
     public UserDetailsServiceImp(UserRepository repository) {
         this.userRepository = repository;
     }
 
     /**
-     * This method allow us to load user from database by this username
-     * 
-     * @param email
-     * @return
-     * @throws UsernameNotFoundException
+     * Charge un utilisateur à partir de la base de données en utilisant son adresse email.
+     *
+     * @param username L'adresse email de l'utilisateur à charger.
+     * @return Un objet UserDetails contenant les informations de l'utilisateur.
+     * @throws UsernameNotFoundException Si l'utilisateur n'est pas trouvé dans la base de données.
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -48,6 +61,4 @@ public class UserDetailsServiceImp implements UserDetailsService {
 
         return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), authorities);
     }
-
-
 }

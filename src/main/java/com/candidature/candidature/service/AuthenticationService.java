@@ -5,7 +5,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +18,13 @@ import com.candidature.candidature.repository.UserRepository;
 
 import io.jsonwebtoken.io.IOException;
 
+/**
+ * @author cheikh diop, sosthene
+ *
+ * La classe `AuthenticationService` gère le processus d'authentification et de
+ * candidature des utilisateurs. Elle fournit des méthodes pour enregistrer
+ * des candidatures et générer des tokens JWT pour les utilisateurs.
+ */
 @Service
 public class AuthenticationService {
 
@@ -33,27 +39,41 @@ public class AuthenticationService {
             UserRepository userRepository,
             CandidatureRepository candidatureRepository,
             AuthenticationManager authenticationManager) {
-
         this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.candidatureRepository = candidatureRepository;
-
     }
 
-    // Methode pour les candidatures
+    /**
+     * Enregistre une candidature pour un utilisateur donné.
+     *
+     * @param lastname     Le nom de famille du candidat.
+     * @param firstname    Le prénom du candidat.
+     * @param telephone    Le numéro de téléphone du candidat.
+     * @param sexe         Le sexe du candidat.
+     * @param address      L'adresse du candidat.
+     * @param birthdate    La date de naissance du candidat.
+     * @param birthplace   Le lieu de naissance du candidat.
+     * @param filePaths    Une liste de chemins vers les fichiers de candidature
+     *                     (doivent être des fichiers PDF).
+     * @param concours     Le nom du concours auquel le candidat postule.
+     * @param user         L'utilisateur qui soumet la candidature.
+     * @return            Une réponse d'authentification contenant un token JWT et le rôle de l'utilisateur.
+     * @throws IOException Si un fichier est introuvable ou n'est pas un PDF.
+     */
     public AuthenticationResponse candidature(
-        String lastname,
-        String firstname,
-        String telephone,
-        String sexe,
-        String address,
-        Date birthdate,
-        String birthplace,
-        List<String> filePaths, // Change from String[] to List<String>
-        String concours,
-        User user
+            String lastname,
+            String firstname,
+            String telephone,
+            String sexe,
+            String address,
+            Date birthdate,
+            String birthplace,
+            List<String> filePaths, // Change from String[] to List<String>
+            String concours,
+            User user
     ) throws IOException {
-        
+
         // Vérification que tous les fichiers existent et sont des PDFs
         for (String filePath : filePaths) {
             Path file = Paths.get(filePath);
@@ -64,7 +84,7 @@ public class AuthenticationService {
                 throw new IllegalArgumentException("Le fichier doit être un PDF : " + filePath);
             }
         }
-    
+
         // Création de l'objet Candidature
         Candidature candidat = new Candidature();
         candidat.setLastname(lastname);
@@ -74,10 +94,10 @@ public class AuthenticationService {
         candidat.setAdress(address);
         candidat.setBirthdate(birthdate);
         candidat.setBirthplace(birthplace);
-        candidat.setFilePath(filePaths); // Stocker le tableau de chemins de fichiers
+        candidat.setFilePath(filePaths); // Stocker la liste de chemins de fichiers
         candidat.setConcours(concours);
         candidat.setUser(user);
-    
+
         // Enregistrement de la candidature et de l'utilisateur
         try {
             candidatureRepository.save(candidat);
@@ -86,23 +106,9 @@ public class AuthenticationService {
         } catch (Exception e) {
             throw new RuntimeException("Erreur lors de l'enregistrement de la candidature.", e);
         }
-    
+
         // Génération du token
-
-        System.out.println("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
-        System.out.println("User ID: " + user.getId());
-        System.out.println("User Email: " + user.getEmail());
-        System.out.println("User Role: " + (user.getRole() != null ? user.getRole().name() : "Role non défini"));
-
-
         String token = jwtService.generateToken(user);
-        System.out.println("token: "+ token);
-        AuthenticationResponse response = new AuthenticationResponse(token, user.getRole().name(), "");
-        System.out.println("Response Token: " + response.getToken());
-        System.out.println("Response Role: " + response.getRole());
-        System.out.println("Response Error: " + response.getError());
-        
-        return response;
+        return new AuthenticationResponse(token, user.getRole().name(), "");
     }
 }
-          

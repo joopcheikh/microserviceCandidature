@@ -17,18 +17,40 @@ import com.candidature.candidature.service.UserDetailsServiceImp;
 
 import java.io.IOException;
 
+/**
+ * @author cheikh diop
+ *
+ * Filtre d'authentification JWT qui intercepte les requêtes HTTP pour vérifier la présence d'un
+ * token JWT dans l'en-tête Authorization. Si un token valide est trouvé, l'utilisateur est authentifié
+ * et le contexte de sécurité est mis à jour.
+ */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsServiceImp userDetailsServiceImp;
 
+    /**
+     * Constructeur pour initialiser le filtre avec les services nécessaires.
+     *
+     * @param jwtService Service de gestion des tokens JWT.
+     * @param userDetailsServiceImp Service pour charger les détails de l'utilisateur.
+     */
     @Autowired
     public JwtAuthenticationFilter(JwtService jwtService, UserDetailsServiceImp userDetailsServiceImp) {
         this.jwtService = jwtService;
         this.userDetailsServiceImp = userDetailsServiceImp;
     }
 
+    /**
+     * Filtre interne qui intercepte chaque requête HTTP. Vérifie la présence et la validité du token JWT.
+     *
+     * @param request La requête HTTP entrante.
+     * @param response La réponse HTTP à envoyer.
+     * @param filterChain La chaîne de filtres à laquelle passer la requête.
+     * @throws ServletException Si une erreur de servlet se produit.
+     * @throws IOException Si une erreur d'entrée/sortie se produit.
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
