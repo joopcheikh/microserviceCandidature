@@ -49,6 +49,7 @@ public class SecurityConfig {
                         req -> req
                         .requestMatchers("/get-candidatures", "/files/**").hasAnyAuthority("ADMIN", "RECRUITER", "USER")
                         .requestMatchers("/candidature/delete/{id}").hasAnyAuthority("ADMIN","USER")
+                        .requestMatchers("/download-all-candidatures").hasAnyAuthority("ADMIN", "RECRUITER")
                         .requestMatchers("/accept-candidature", "/reject-candidature").hasAuthority("RECRUITER")
                                 .anyRequest()
                                 .authenticated()

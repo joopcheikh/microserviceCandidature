@@ -1,5 +1,7 @@
 package com.candidature.candidature.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,13 +12,20 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import java.util.ArrayList;
 import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -143,6 +152,47 @@ public class CandidatureController {
             return ResponseEntity.ok("Candidature et fichiers supprimés avec succès.");
         } else {
             return ResponseEntity.status(500).body("Erreur lors de la suppression de la candidature.");
+        }
+    }
+
+
+
+    private static final String CANDIDATURES_FOLDER_PATH = "candidatures/";
+
+    @GetMapping("/download-all-candidatures")
+    public ResponseEntity<InputStreamResource> downloadAllCandidatures() {
+        try {
+            // Créer un fichier temporaire ZIP dans lequel toutes les candidatures seront zippées
+            File zipFile = File.createTempFile("candidatures_", ".zip");
+
+            try (ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFile))) {
+                // Parcourir tous les fichiers du dossier des candidatures
+                Files.walk(Paths.get(CANDIDATURES_FOLDER_PATH))
+                        .filter(Files::isRegularFile) // On ne prend que les fichiers, pas les dossiers
+                        .forEach(filePath -> {
+                            try {
+                                // Ajouter chaque fichier au ZIP
+                                ZipEntry zipEntry = new ZipEntry(filePath.toString().replace(CANDIDATURES_FOLDER_PATH, ""));
+                                zipOut.putNextEntry(zipEntry);
+                                Files.copy(filePath, zipOut);
+                                zipOut.closeEntry();
+                            } catch (IOException e) {
+                                e.printStackTrace(); // Gérer l'exception si un fichier ne peut pas être ajouté
+                            }
+                        });
+            }
+
+            // Préparer la réponse HTTP
+            InputStreamResource resource = new InputStreamResource(new FileInputStream(zipFile));
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=candidatures.zip")
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(resource);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
