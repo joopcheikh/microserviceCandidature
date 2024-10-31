@@ -12,6 +12,10 @@ target/
 .settings
 .springBeans
 .sts4-cache
+.env
+
+./env
+/env
 
 ### IntelliJ IDEA ###
 .idea
@@ -31,7 +35,3 @@ build/
 
 ### VS Code ###
 .vscode/
-
-/candidatures
-.candidatures
-./candidatures

@@ -3,7 +3,7 @@ package com.candidature.candidature.service;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.context.annotation.Bean;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

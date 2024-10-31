@@ -11,10 +11,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import java.util.ArrayList;
 import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -24,6 +22,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,6 +41,9 @@ import com.candidature.candidature.service.CandidatureServiceImpl;
 
 @RestController
 public class CandidatureController {
+
+    @Autowired
+    private JavaMailSender mailSender;
 
     @Autowired
     private AuthenticationService authenticationService;
@@ -116,7 +119,7 @@ public class CandidatureController {
             AuthenticationResponse response = authenticationService.candidature(
                     lastname, firstname, telephone, sexe, address, birthdate, birthplace,
                     filePaths, concours, user);
-
+            
             return ResponseEntity.ok().body(response);
         } catch (IOException e) {
             AuthenticationResponse response = new AuthenticationResponse();
@@ -124,6 +127,8 @@ public class CandidatureController {
             return ResponseEntity.badRequest().body(response);
         }
     }
+
+
 
     @DeleteMapping("/candidature/delete/{id}")
     public ResponseEntity<String> deleteCandidature(@PathVariable("id") Integer candidatureId) {
@@ -155,14 +160,13 @@ public class CandidatureController {
         }
     }
 
-
-
     private static final String CANDIDATURES_FOLDER_PATH = "candidatures/";
 
     @GetMapping("/download-all-candidatures")
     public ResponseEntity<InputStreamResource> downloadAllCandidatures() {
         try {
-            // Créer un fichier temporaire ZIP dans lequel toutes les candidatures seront zippées
+            // Créer un fichier temporaire ZIP dans lequel toutes les candidatures seront
+            // zippées
             File zipFile = File.createTempFile("candidatures_", ".zip");
 
             try (ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFile))) {
@@ -172,7 +176,8 @@ public class CandidatureController {
                         .forEach(filePath -> {
                             try {
                                 // Ajouter chaque fichier au ZIP
-                                ZipEntry zipEntry = new ZipEntry(filePath.toString().replace(CANDIDATURES_FOLDER_PATH, ""));
+                                ZipEntry zipEntry = new ZipEntry(
+                                        filePath.toString().replace(CANDIDATURES_FOLDER_PATH, ""));
                                 zipOut.putNextEntry(zipEntry);
                                 Files.copy(filePath, zipOut);
                                 zipOut.closeEntry();

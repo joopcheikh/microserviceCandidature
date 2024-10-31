@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.candidature.candidature.model.Candidature;
@@ -19,6 +20,9 @@ public class CandidatureServiceImpl {
 
     @Autowired
     private JavaMailSender mailSender;
+
+    String smtpUsername = "gats.gatsmapping@gmail.com";
+
 
     public List<Candidature> listerCandidature() {
         return candidatureRepository.findAll();
@@ -60,9 +64,10 @@ public class CandidatureServiceImpl {
         sendEmail(userEmail, subject, content);
     }
 
+    @Async
     private void sendEmail(String to, String subject, String content) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("webmaster@gatsmapping.com");
+        message.setFrom(smtpUsername);
         message.setTo(to);
         message.setSubject(subject);
         message.setText(content);

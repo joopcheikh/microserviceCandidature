@@ -5,11 +5,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.candidature.candidature.model.Candidature;
@@ -17,30 +17,29 @@ import com.candidature.candidature.model.User;
 import com.candidature.candidature.repository.CandidatureRepository;
 import com.candidature.candidature.repository.UserRepository;
 
-import io.jsonwebtoken.io.IOException;
-
 @Service
 public class AuthenticationService {
+    String smtpUsername = "gats.gatsmapping@gmail.com";
 
     private final CandidatureRepository candidatureRepository;
     private final UserRepository userRepository;
     private final JwtService jwtService;
 
     @Autowired
+    private JavaMailSender mailSender;
+
+    @Autowired
     public AuthenticationService(
             JwtService jwtService,
-            PasswordEncoder passwordEncoder,
             UserRepository userRepository,
-            CandidatureRepository candidatureRepository,
-            AuthenticationManager authenticationManager) {
+            CandidatureRepository candidatureRepository) {
 
         this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.candidatureRepository = candidatureRepository;
-
     }
 
-    // Methode pour les candidatures
+    // Méthode pour traiter une candidature
     public AuthenticationResponse candidature(
         String lastname,
         String firstname,
@@ -49,10 +48,10 @@ public class AuthenticationService {
         String address,
         Date birthdate,
         String birthplace,
-        List<String> filePaths, // Change from String[] to List<String>
+        List<String> filePaths, // Liste des chemins de fichiers
         String concours,
         User user
-    ) throws IOException {
+    ) throws IllegalArgumentException {
         
         // Vérification que tous les fichiers existent et sont des PDFs
         for (String filePath : filePaths) {
@@ -64,7 +63,7 @@ public class AuthenticationService {
                 throw new IllegalArgumentException("Le fichier doit être un PDF : " + filePath);
             }
         }
-    
+
         // Création de l'objet Candidature
         Candidature candidat = new Candidature();
         candidat.setLastname(lastname);
@@ -74,10 +73,10 @@ public class AuthenticationService {
         candidat.setAdress(address);
         candidat.setBirthdate(birthdate);
         candidat.setBirthplace(birthplace);
-        candidat.setFilePath(filePaths); // Stocker le tableau de chemins de fichiers
+        candidat.setFilePath(filePaths); // Stocker les chemins de fichiers
         candidat.setConcours(concours);
         candidat.setUser(user);
-    
+
         // Enregistrement de la candidature et de l'utilisateur
         try {
             candidatureRepository.save(candidat);
@@ -86,23 +85,34 @@ public class AuthenticationService {
         } catch (Exception e) {
             throw new RuntimeException("Erreur lors de l'enregistrement de la candidature.", e);
         }
-    
+
         // Génération du token
-
-        System.out.println("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
-        System.out.println("User ID: " + user.getId());
-        System.out.println("User Email: " + user.getEmail());
-        System.out.println("User Role: " + (user.getRole() != null ? user.getRole().name() : "Role non défini"));
-
-
         String token = jwtService.generateToken(user);
-        System.out.println("token: "+ token);
+
+        // Réponse immédiate avant l'envoi de l'e-mail
         AuthenticationResponse response = new AuthenticationResponse(token, user.getRole().name(), "");
-        System.out.println("Response Token: " + response.getToken());
-        System.out.println("Response Role: " + response.getRole());
-        System.out.println("Response Error: " + response.getError());
-        
-        return response;
+
+        // Envoi de l'email de façon asynchrone
+        sendEmail(user.getEmail(), "CONFIRMATION RECEPTION CANDIDATURE", 
+            "Bonjour, " + user.getLastname() + ", votre candidature au concours de " + concours + " a bien été reçue. Elle sera examinée et nous vous reviendrons.");
+
+        return response; // Réponse au frontend sans attendre l'envoi d'email
+    }
+
+    // Méthode pour envoyer l'e-mail de façon asynchrone
+    @Async
+    public void sendEmail(String to, String subject, String content) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(smtpUsername);
+            message.setTo(to);
+            message.setSubject(subject);
+            message.setText(content);
+            mailSender.send(message);
+            System.out.println("Email envoyé avec succès !");
+        } catch (Exception e) {
+            System.out.println("Échec de l'envoi de l'email : " + e.getMessage());
+            // Optionnel : journaliser l'erreur ou prendre une autre action
+        }
     }
 }
-          

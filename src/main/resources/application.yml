@@ -32,16 +32,6 @@ spring:
       max-file-size: 50MB
       max-request-size: 50MB
   
-
-  mail:
-        host: mail.gatsmapping.com
-        port: 465
-        username: webmaster@gatsmapping.com
-        password: vPORL@h+VV_0
-        properties:
-            mail.smtp.auth: true
-            mail.smtp.ssl.enable: true
-
 server:
   port: 8091
 
