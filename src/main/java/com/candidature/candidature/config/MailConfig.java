@@ -10,10 +10,6 @@ import java.util.Properties;
 
 @Configuration
 public class MailConfig {
-    String smtpHost = "smtp.gmail.com";
-    String smtpPort = "587";  // Port 587 pour TLS
-    String smtpUsername = "gats.gatsmapping@gmail.com";
-    String smtpPassword = "bula axpo ulhk vyhx";
 
     @Bean
     public JavaMailSender javaMailSender() {
