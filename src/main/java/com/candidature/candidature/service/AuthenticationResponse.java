@@ -1,20 +1,19 @@
 package com.candidature.candidature.service;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
+
 public class AuthenticationResponse {
-    private String token;
+    private String accessToken;
+    private String refreshToken;
     private String role;
     private String error;
 
-    public AuthenticationResponse(String token, String role, String error) {
-        this.token = token;
-        this.role = role;
-        this.error = error;
-    }
 
     // Getters and Setters
 }

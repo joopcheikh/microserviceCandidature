@@ -87,10 +87,11 @@ public class AuthenticationService {
         }
 
         // Génération du token
-        String token = jwtService.generateToken(user);
 
+        String accessToken = jwtService.generateToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
         // Réponse immédiate avant l'envoi de l'e-mail
-        AuthenticationResponse response = new AuthenticationResponse(token, user.getRole().name(), "");
+        AuthenticationResponse response = new AuthenticationResponse(accessToken,refreshToken, user.getRole().name(), "");
 
         // Envoi de l'email de façon asynchrone
         sendEmail(user.getEmail(), "CONFIRMATION RECEPTION CANDIDATURE", 
