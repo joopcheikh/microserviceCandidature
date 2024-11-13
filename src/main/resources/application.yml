@@ -13,9 +13,9 @@ spring:
     name: MicroserviceCandidature
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/registration
+    url: jdbc:postgresql://localhost:5432/armee_sn
     username: postgres
-    password: aaaa
+    password: qqqq
 
   jpa:
     hibernate:
